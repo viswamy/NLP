@@ -1,0 +1,14 @@
+'''
+key = bytearray([0x13, 0x00, 0x00, 0x00, 0x88, 0x00])
+print(key[0])
+print(key[1])
+print(key[2])
+print(key[3])
+print(key[4])
+print(key[5])
+'''
+
+items = bytearray([0x13, 0x00, 0x00, 0x00, 0x88, 0x00])
+
+for item in items:
+    print(item)
