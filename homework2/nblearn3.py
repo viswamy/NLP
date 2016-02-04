@@ -81,12 +81,18 @@ class Util:
     def get_dictionary(absolute_path):
         dictionary = {}
         if(os.path.isfile(absolute_path)):
-            temp = get_dictionary_file(absolute_path)
+            if(absolute_path.split('.')[-1] != 'txt'):
+                return
+            if(absolute_path == 'README.txt' or absolute_path == "README.md"):
+                return
+            temp = Util.get_dictionary_file(absolute_path)
             dictionary = Util.merge_dictionaries(dictionary, temp)
             return dictionary
         for sub_path in os.listdir(absolute_path):
             absolute_sub_path = absolute_path + "/" + sub_path
             if(os.path.isfile(absolute_sub_path)):
+                if(absolute_sub_path.split('.')[-1] != 'txt'):
+                    continue
                 temp = Util.get_dictionary_file(absolute_sub_path)
                 dictionary = Util.merge_dictionaries(dictionary, temp)
             else:
