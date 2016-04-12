@@ -1,0 +1,117 @@
+'''
+@author: Virupaksha Swamy
+@email: vswamy@usc.edu
+@description: Program to build the model for HMM tagging!
+'''
+
+import sys
+import os
+import time
+
+
+class Model:
+        
+    def __init__(self, path):
+        self.path = path
+        self.iv = []
+        self.tp = []
+        self.ep = {}
+        
+        self.tags = []
+        self.build_tags()
+        
+        self.build_initial_model()
+        
+        self.process()
+        return
+
+    def build_initial_model(self):
+        for i in range(0, len(self.tags)):
+            self.iv.append(0)
+        for i in range(0, len(self.tags)):
+            ll = []
+            for j in range(0, len(self.tags)):
+                ll.append(0)
+            self.tp.append(ll) 
+        return self.tp   
+    
+    def build_tags(self):
+        f = open(self.path, 'r')
+        content = f.read()
+        content = content.replace('\n' , '')
+        tagged_words = content.split(' ')
+        tag_set = set()
+        for tagged_word in tagged_words:
+            tag_set.add(tagged_word.split('/')[-1])
+        self.tags = list(tag_set)
+        return
+    
+    def clean_line(self, line):
+        line = line.replace('\n','')
+        return line
+
+    def clean_line2(self, line):
+        line = line.replace('\n','')
+        out = []
+        tokens = line.split(' ')
+        for token in tokens:
+            t = []
+            word_tag = token.split('/')
+            t.append(word_tag[0])
+            t.append(word_tag[-1])
+            out.append(t)
+        return out
+        
+    def process_transition_probabilities(self, line):
+        tokens = line.split(' ')
+        initial_token = tokens[0]
+        initial_word = initial_token.split('/')[0]
+        initial_tag = initial_token.split('/')[-1]
+        self.iv[self.tags.index(initial_tag)] += 1
+            
+        for i in range(1, len(tokens)):
+            prev_word = tokens[i-1].split('/')[0]
+            prev_tag = tokens[i-1].split('/')[-1]
+            cur_word = tokens[i].split('/')[0]
+            cur_tag = tokens[i].split('/')[-1]
+            self.tp[self.tags.index(prev_tag)][self.tags.index(cur_tag)] += 1
+        return
+        
+    def process_emission_probabilities(self, line):
+        tokens = line.split(' ')
+        for i in range(0, len(tokens)):
+            word = tokens[i].split('/')[0]
+            tag = tokens[i].split('/')[-1]
+            if(word in self.ep.keys()):
+                t = self.ep.get(word)
+                if(tag in t):
+                    t[tag] += 1
+                else:
+                    t[tag] = 1
+            else:
+                self.ep[word] = {}
+                t = self.ep.get(word)
+                t[tag] = 1
+        return
+        
+    def process(self):
+        f = open(self.path, 'r')
+        for line in f:
+            line = self.clean_line(line)
+            self.process_transition_probabilities(line)
+            self.process_emission_probabilities(line)    
+        return              
+
+#path = 'temp.txt'
+path = 'catalan_corpus_train_tagged.txt'
+
+start = time.clock()
+x = Model(path)
+print(time.clock() - start)
+
+'''
+print(x.tags)
+print(x.iv)
+print(x.tp)
+print(x.ep)
+'''
