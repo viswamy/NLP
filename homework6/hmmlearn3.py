@@ -19,7 +19,9 @@ class Model:
         self.tags = set()
         
         self.process()
-        self.post_process()
+        self.post_process_tp()
+        self.post_process_ep()
+        self.post_process_iv()
         return
 
     def clean_line(self, line):
@@ -29,7 +31,7 @@ class Model:
         for token in tokens:
             t = []
             word_tag = token.split('/')
-            t.append(word_tag[0])
+            t.append('/'.join(word_tag[0:len(word_tag) - 1]))
             t.append(word_tag[-1])
             out.append(t)
         return out
@@ -85,9 +87,31 @@ class Model:
         out["iv"] = self.iv
         out["tp"] = self.tp
         out["ep"] = self.ep
+        out["tags"] = list(self.tags)
         return json.dumps(out)
     
-    def post_process(self):
+    def post_process_iv(self):
+        x = set(self.iv.keys())
+        y = self.tags.difference(x)
+        for item in y:
+            self.iv[item] = 1
+            
+        sum = 0
+        for t in self.iv:
+            sum += self.iv[t]
+        self.iv['__sum__'] = sum
+        return
+        
+    def post_process_ep(self):
+        for t in self.ep:
+            x = self.ep[t]
+            sum = 0
+            for y in x:
+                sum += x[y]
+            x['__sum__'] = sum
+        return
+        
+    def post_process_tp(self):
         for t in self.tp:
             sum = 0
             t2 = self.tp[t]
@@ -103,7 +127,7 @@ class Model:
             t2["__sum__"] = sum
     
 #path = 'temp.txt'
-path = 'catalan_corpus_dev_tagged.txt'
+path = sys.argv[1]
 
 start = time.clock()
 x = Model(path)
