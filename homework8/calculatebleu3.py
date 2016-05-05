@@ -10,6 +10,19 @@ import time
 import json
 import math
 
+
+
+'''
+    Takes a list of strings and returns total number of words in it
+'''
+def getlen(l):
+    count = 0
+    for item in l:
+        count += len(item.split(' '))
+    return count
+
+
+
 '''
     takes a string and n
     returns a list of all n-grams in the given string where!
@@ -79,7 +92,22 @@ while(cur_ngrams_len <= max_n):
     cur_ngrams_len += 1
     
 bleu = math.exp(bleu)
+
+
+c_sentences_len = getlen(c_sentences)
+min = 9999999999999
+r_sentences_len = 0
+
+for i in range(0, len(r_sentences)):
+    r_sentences_len_t = getlen(r_sentences[i])
+    if(abs(c_sentences_len - r_sentences_len_t) < min):
+        min = abs(c_sentences_len - r_sentences_len_t)
+        r_sentences_len = r_sentences_len_t
+
 bp = 1
+if(c_sentences_len <= r_sentences_len):
+    bp = math.exp(1 - float(r_sentences_len) / c_sentences_len)
+
 bleu = bp * bleu
 
 print(bleu)
